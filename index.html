@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Clipper sign-in</title>
+<style>
+  :root { --bg: #f6f6f4; --fg: #1d1d1b; --muted: #6b6b66; --card: #fff; --line: #ddd; --accent: #1f6feb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --fg: #ececea; --muted: #a3a39e; --card: #20201e; --line: #3a3a37; --accent: #58a6ff; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 640px; margin: 48px auto; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+  h1 { font-size: 1.3rem; margin: 0 0 8px; }
+  p { color: var(--muted); margin: 8px 0; }
+  textarea { width: 100%; box-sizing: border-box; min-height: 110px; font: 13px/1.4 ui-monospace, monospace;
+             background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  button { margin-top: 12px; background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+           padding: 10px 18px; font-size: 1rem; cursor: pointer; }
+  .ok { color: #2da44e; }
+  .bad { color: #cf222e; }
+  footer { margin-top: 16px; font-size: .85rem; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <h1 id="title">Clipper sign-in</h1>
+    <p id="say">Copy this address, then paste it into Clipper (Settings &gt; Posting) and press Finish.</p>
+    <textarea id="url" readonly aria-label="The address to paste into Clipper"></textarea>
+    <button id="copy" type="button">Copy</button>
+    <span id="done" class="ok" hidden> Copied</span>
+  </div>
+  <footer><a href="terms.html">Terms of Service</a> · <a href="privacy.html">Privacy Policy</a></footer>
+</main>
+<script>
+  const here = window.location.href;
+  const box = document.getElementById("url");
+  box.value = here;
+  const q = new URLSearchParams(window.location.search);
+  if (q.get("error")) {
+    document.getElementById("title").textContent = "Sign-in was not completed";
+    const say = document.getElementById("say");
+    say.className = "bad";
+    say.textContent = (q.get("error_description") || q.get("error")) + ". Go back to Clipper and click Connect again.";
+  } else if (!q.get("code")) {
+    document.getElementById("say").textContent =
+      "This page receives the sign-in code after you click Connect in Clipper. There is no code in this address yet.";
+  }
+  document.getElementById("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(here); }
+    catch (e) { box.select(); document.execCommand("copy"); }
+    document.getElementById("done").hidden = false;
+  });
+</script>
+</body>
+</html>
